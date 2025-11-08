@@ -94,14 +94,6 @@ class Window(QMainWindow):
         self.border_radius_input.setValue(self.tooltip.getBorderRadius())
         self.border_radius_input.valueChanged.connect(self.border_radius_input_changed)
 
-        self.offset_x_input = QSpinBox()
-        self.offset_x_input.setRange(-500, 500)
-        self.offset_x_input.valueChanged.connect(self.offset_x_input_changed)
-
-        self.offset_y_input = QSpinBox()
-        self.offset_y_input.setRange(-500, 500)
-        self.offset_y_input.valueChanged.connect(self.offset_y_input_changed)
-
         self.background_color_input = QLineEdit()
         self.background_color_input.setText(self.tooltip.getBackgroundColor().name())
         self.background_color_input.textChanged.connect(self.background_color_input_changed)
@@ -120,8 +112,6 @@ class Window(QMainWindow):
         # Add widgets to layout
         right_settings_layout = QFormLayout()
         right_settings_layout.addRow('Border radius: ', self.border_radius_input)
-        right_settings_layout.addRow('Offset X: ', self.offset_x_input)
-        right_settings_layout.addRow('Offset Y: ', self.offset_y_input)
         right_settings_layout.addRow('Background color: ', self.background_color_input)
         right_settings_layout.addRow('Text color: ', self.text_color_input)
         right_settings_layout.addRow('Border color: ', self.border_color_input)
@@ -164,16 +154,6 @@ class Window(QMainWindow):
 
     def border_radius_input_changed(self, border_radius):
         self.tooltip.setBorderRadius(border_radius)
-
-    def offset_x_input_changed(self, offset_x):
-        self.tooltip.setOffsetsAll(
-            QPoint(offset_x, self.tooltip.getOffsetByPlacement(self.tooltip.getActualPlacement()).y())
-        )
-
-    def offset_y_input_changed(self, offset_y):
-        self.tooltip.setOffsetsAll(
-            QPoint(self.tooltip.getOffsetByPlacement(self.tooltip.getActualPlacement()).x(), offset_y)
-        )
 
     def background_color_input_changed(self, text):
         self.tooltip.setBackgroundColor(QColor(text))

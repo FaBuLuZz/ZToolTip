@@ -7,15 +7,13 @@ from .utils import Utils
 class PlacementUtils:
 
     @staticmethod
-    def get_optimal_placement(widget: QWidget, size: QSize, triangle_size: int,
-                              offsets: dict[TooltipPlacement, QPoint]) -> TooltipPlacement:
+    def get_optimal_placement(widget: QWidget, size: QSize, triangle_size: int) -> TooltipPlacement:
         """Calculate the optimal placement of a tooltip based on the widget,
-        size, triangle size, and offsets.
+        size and triangle size.
 
         :param widget: widget of the tooltip
         :param size: size of the tooltip
         :param triangle_size: size of the triangle
-        :param offsets: offsets of the tooltip
         :return: optimal placement
         """
 
@@ -43,47 +41,12 @@ class PlacementUtils:
                 optimal_placement = placement
 
             tooltip_rect = PlacementUtils.__get_tooltip_rect(
-                widget, placement, size, triangle_size, offsets
+                widget, placement, size, triangle_size
             )
             if PlacementUtils.__rect_contained_by_screen(tooltip_rect):
                 return placement
 
         return optimal_placement
-
-    @staticmethod
-    def get_fallback_placement(widget: QWidget, primary_placement: TooltipPlacement, fallback_placements:
-                               list[TooltipPlacement], size: QSize, triangle_size: int, offsets:
-                               dict[TooltipPlacement, QPoint]) -> TooltipPlacement | None:
-        """Calculate fallback placement if the current placement would
-        lead to a tooltip that doesn't entirely fit on the screen
-        
-        :param widget: widget of the tooltip
-        :param primary_placement: primary placement of the tooltip
-        :param fallback_placements: fallback placements that are available
-        :param size: size of the tooltip
-        :param triangle_size: size of the triangle
-        :param offsets: offsets of the tooltip
-        :return: fallback placement (None if current placement is valid)
-        """
-
-        tooltip_rect = PlacementUtils.__get_tooltip_rect(
-            widget, primary_placement, size, triangle_size, offsets
-        )
-
-        # Return None if current placement is valid
-        if PlacementUtils.__rect_contained_by_screen(tooltip_rect):
-            return None
-
-        # Check all fallback placements and return first valid placement
-        for placement in fallback_placements:
-            if placement == primary_placement or placement == TooltipPlacement.AUTO:
-                continue
-            tooltip_rect = PlacementUtils.__get_tooltip_rect(
-                widget, placement, size, triangle_size, offsets
-            )
-            if PlacementUtils.__rect_contained_by_screen(tooltip_rect):
-                return placement
-        return None
 
     @staticmethod
     def __rect_contained_by_screen(rect: QRect) -> bool:
@@ -100,15 +63,14 @@ class PlacementUtils:
 
     @staticmethod
     def __get_tooltip_rect(widget: QWidget, placement: TooltipPlacement, size: QSize,
-                           triangle_size: int, offsets: dict[TooltipPlacement, QPoint]) -> QRect:
+                           triangle_size: int) -> QRect:
         """Get the rect of a tooltip based on the widget position,
-        placement, size, triangle size, and offsets of the tooltip
+        placement, size and triangle size of the tooltip
 
         :param widget: widget of the tooltip
         :param placement: placement of the tooltip
         :param size: size of the tooltip
         :param triangle_size: size of the triangle
-        :param offsets: offsets of the tooltip
         :return: rect of the tooltip
         """
 
@@ -117,23 +79,23 @@ class PlacementUtils:
 
         # Calculate rect depending on placement
         if placement == TooltipPlacement.TOP:
-            rect.setX(int(widget_pos.x() + widget.width() / 2 - size.width() / 2) + offsets[placement].x())
-            rect.setY(widget_pos.y() - size.height() - triangle_size + offsets[placement].y())
+            rect.setX(int(widget_pos.x() + widget.width() / 2 - size.width() / 2))
+            rect.setY(widget_pos.y() - size.height() - triangle_size)
             rect.setRight(rect.x() + size.width())
             rect.setBottom(rect.y() + size.height() + triangle_size)
         elif placement == TooltipPlacement.BOTTOM:
-            rect.setX(int(widget_pos.x() + widget.width() / 2 - size.width() / 2) + offsets[placement].x())
-            rect.setY(widget_pos.y() + widget.height() + offsets[placement].y())
+            rect.setX(int(widget_pos.x() + widget.width() / 2 - size.width() / 2))
+            rect.setY(widget_pos.y() + widget.height())
             rect.setRight(rect.x() + size.width())
             rect.setBottom(rect.y() + size.height() + triangle_size)
         elif placement == TooltipPlacement.LEFT:
-            rect.setX(widget_pos.x() - size.width() - triangle_size + offsets[placement].x())
-            rect.setY(int(widget_pos.y() + widget.height() / 2 - size.width() / 2) + offsets[placement].y())
+            rect.setX(widget_pos.x() - size.width() - triangle_size)
+            rect.setY(int(widget_pos.y() + widget.height() / 2 - size.width() / 2))
             rect.setRight(rect.x() + size.width() + triangle_size)
             rect.setBottom(rect.y() + size.height())
         elif placement == TooltipPlacement.RIGHT:
-            rect.setX(widget_pos.x() + widget.width() + offsets[placement].x())
-            rect.setY(int(widget_pos.y() + widget.height() / 2 - size.width() / 2) + offsets[placement].y())
+            rect.setX(widget_pos.x() + widget.width())
+            rect.setY(int(widget_pos.y() + widget.height() / 2 - size.width() / 2))
             rect.setRight(rect.x() + size.width() + triangle_size)
             rect.setBottom(rect.y() + size.height())
 

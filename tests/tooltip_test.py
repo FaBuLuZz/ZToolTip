@@ -15,19 +15,8 @@ def test_initial_values(qtbot):
     assert tooltip.getText() == ''
     assert tooltip.getDuration() == 0
     assert tooltip.getPlacement() == TooltipPlacement.AUTO
-    assert tooltip.getFallbackPlacements() == []
     assert tooltip.isTriangleEnabled() == True
     assert tooltip.getTriangleSize() == 5
-    assert tooltip.getOffsetByPlacement(TooltipPlacement.LEFT) == QPoint(0, 0)
-    assert tooltip.getOffsetByPlacement(TooltipPlacement.RIGHT) == QPoint(0, 0)
-    assert tooltip.getOffsetByPlacement(TooltipPlacement.TOP) == QPoint(0, 0)
-    assert tooltip.getOffsetByPlacement(TooltipPlacement.BOTTOM) == QPoint(0, 0)
-    assert tooltip.getOffsets() == {
-        TooltipPlacement.LEFT:   QPoint(0, 0),
-        TooltipPlacement.RIGHT:  QPoint(0, 0),
-        TooltipPlacement.TOP:    QPoint(0, 0),
-        TooltipPlacement.BOTTOM: QPoint(0, 0)
-    }
     assert tooltip.getShowDelay() == 50
     assert tooltip.getHideDelay() == 50
     assert tooltip.getFadeInDuration() == 150
@@ -147,23 +136,6 @@ def test_set_placement(qtbot):
     assert tooltip.y() == button.height()
 
 
-def test_set_fallback_placements(qtbot):
-    """Test setting the fallback placements of the tooltip"""
-
-    window = QMainWindow()
-    button = QPushButton(window)
-    tooltip = Tooltip(button, 'Tooltip')
-    tooltip.setPlacement(TooltipPlacement.LEFT)
-    qtbot.addWidget(window)
-    qtbot.addWidget(button)
-    qtbot.addWidget(tooltip)
-
-    fallback_placements = [TooltipPlacement.BOTTOM, TooltipPlacement.RIGHT]
-    tooltip.setFallbackPlacements(fallback_placements)
-    assert tooltip.getFallbackPlacements() == fallback_placements
-    assert tooltip.getActualPlacement() == TooltipPlacement.BOTTOM
-
-
 def test_set_triangle(qtbot):
     """Test enabling and disabling triangle and changing its size"""
 
@@ -186,45 +158,6 @@ def test_set_triangle(qtbot):
     # Disabled triangle
     tooltip.setTriangleEnabled(False)
     assert tooltip.width() == width - 5
-
-
-def test_set_offsets(qtbot):
-    """Test setting the offsets of the tooltip"""
-
-    offsets = {
-        TooltipPlacement.LEFT:   QPoint(-10, 0),
-        TooltipPlacement.RIGHT:  QPoint(10, 0),
-        TooltipPlacement.TOP:    QPoint(0, -10),
-        TooltipPlacement.BOTTOM: QPoint(0, 10)
-    }
-
-    window = QMainWindow()
-    button = QPushButton(window)
-    tooltip = Tooltip(button, 'Tooltip')
-    tooltip.setOffsets(offsets)
-    tooltip.setOpacity(0)
-    tooltip.setFadeInDuration(0)
-    tooltip.setShowDelay(0)
-    tooltip.setDropShadowEnabled(False)
-    qtbot.addWidget(window)
-    qtbot.addWidget(button)
-    qtbot.addWidget(tooltip)
-
-    # Left
-    tooltip.setPlacement(TooltipPlacement.LEFT)
-    assert tooltip.x() == -tooltip.width() - 10
-
-    # Right
-    tooltip.setPlacement(TooltipPlacement.RIGHT)
-    assert tooltip.x() == button.width() + 10
-
-    # Top
-    tooltip.setPlacement(TooltipPlacement.TOP)
-    assert tooltip.y() == -tooltip.height() - 10
-
-    # Bottom
-    tooltip.setPlacement(TooltipPlacement.BOTTOM)
-    assert tooltip.y() == button.height() + 10
 
 
 def test_set_delays(qtbot):

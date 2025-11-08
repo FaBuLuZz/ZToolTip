@@ -34,15 +34,8 @@ class Tooltip(TooltipInterface):
         self.__text = text
         self.__duration = 0
         self.__placement = TooltipPlacement.AUTO
-        self.__fallback_placements = []
         self.__triangle_enabled = True
         self.__triangle_size = 5
-        self.__offsets = {
-            TooltipPlacement.LEFT:   QPoint(0, 0),
-            TooltipPlacement.RIGHT:  QPoint(0, 0),
-            TooltipPlacement.TOP:    QPoint(0, 0),
-            TooltipPlacement.BOTTOM: QPoint(0, 0)
-        }
         self.__show_delay = 50
         self.__hide_delay = 50
         self.__fade_in_duration = 150
@@ -234,34 +227,12 @@ class Tooltip(TooltipInterface):
 
     def getActualPlacement(self) -> TooltipPlacement:
         """Get the actual placement of the tooltip. This will be different
-        from the placement if the placement is TooltipPlacement.AUTO
-        or the tooltip is shown in a fallback placement.
+        from the placement if the placement is TooltipPlacement.AUTO.
 
         :return: actual placement (LEFT / RIGHT / TOP / BOTTOM)
         """
 
         return self.__actual_placement
-
-    def getFallbackPlacements(self) -> list[TooltipPlacement]:
-        """Get the fallback placements of the tooltip. If the tooltip
-        doesn't fit on the screen with the main placement, one of the
-        fallback placements will be chosen instead.
-
-        :return: fallback placements
-        """
-
-        return self.__fallback_placements
-
-    def setFallbackPlacements(self, fallback_placements: list[TooltipPlacement]):
-        """Set the fallback placements of the tooltip. If the tooltip
-        doesn't fit on the screen with the main placement, one of the
-        fallback placements will be chosen instead.
-
-        :param fallback_placements: new fallback placements
-        """
-
-        self.__fallback_placements = fallback_placements
-        self.__update_ui()
 
     def isTriangleEnabled(self) -> bool:
         """Get whether the triangle is enabled
@@ -295,53 +266,6 @@ class Tooltip(TooltipInterface):
         """
 
         self.__triangle_size = size
-        self.__update_ui()
-
-    def getOffsets(self) -> dict[TooltipPlacement, QPoint]:
-        """Get the offsets of the tooltip
-
-        :return: offsets
-        """
-
-        return self.__offsets
-
-    def getOffsetByPlacement(self, placement: TooltipPlacement) -> QPoint:
-        """Get a specific offset of the tooltip
-
-        :param placement: placement to get the offset for
-        :return: offset
-        """
-
-        return self.__offsets[placement]
-
-    def setOffsets(self, offsets: dict[TooltipPlacement, QPoint]):
-        """Set the offsets of the tooltip individually
-
-        :param offsets: dict with placements as the keys and offsets as values
-        """
-
-        for placement, offset in offsets.items():
-            self.__offsets[placement] = offset
-        self.__update_ui()
-
-    def setOffsetByPlacement(self, placement: TooltipPlacement, offset: QPoint):
-        """Set a specific offset of the tooltip
-
-        :param placement: placement to set the offset for
-        :param offset: new offset
-        """
-
-        self.__offsets[placement] = offset
-        self.__update_ui()
-
-    def setOffsetsAll(self, offset: QPoint):
-        """Set the offsets of all the placements to a value
-
-        :param offset: new offset for all the placements
-        """
-
-        for placement, _ in self.__offsets.items():
-            self.__offsets[placement] = offset
         self.__update_ui()
 
     def getShowDelay(self) -> int:
@@ -888,18 +812,10 @@ class Tooltip(TooltipInterface):
         # Calculate actual tooltip placement
         if self.__placement == TooltipPlacement.AUTO:
             self.__actual_placement = PlacementUtils.get_optimal_placement(
-                self.__widget, body_size, self.__triangle_size, self.__offsets
+                self.__widget, body_size, self.__triangle_size
             )
         else:
             self.__actual_placement = self.__placement
-            # Calculate fallback placement
-            if self.__fallback_placements:
-                fallback_placement = PlacementUtils.get_fallback_placement(
-                    self.__widget, self.__actual_placement, self.__fallback_placements,
-                    body_size, self.__triangle_size, self.__offsets
-                )
-                if fallback_placement:
-                    self.__actual_placement = fallback_placement
 
         # Calculate total size and widget positions based on placement
         size = QSize(body_size.width(), body_size.height())
@@ -916,9 +832,8 @@ class Tooltip(TooltipInterface):
             tooltip_triangle_pos.setY(body_size.height() - border_width)
             tooltip_pos.setX(
                 int(widget_pos.x() + self.__widget.width() / 2 - size.width() / 2)
-                + self.__offsets[self.__actual_placement].x()
             )
-            tooltip_pos.setY(widget_pos.y() - size.height() + self.__offsets[self.__actual_placement].y())
+            tooltip_pos.setY(widget_pos.y() - size.height())
 
         elif self.__actual_placement == TooltipPlacement.BOTTOM:
             size.setHeight(body_size.height() + self.__triangle_widget.height() - border_width)
@@ -926,20 +841,18 @@ class Tooltip(TooltipInterface):
             tooltip_body_pos.setY(self.__triangle_widget.height() - border_width)
             tooltip_pos.setX(
                 int(widget_pos.x() + self.__widget.width() / 2 - size.width() / 2)
-                + self.__offsets[self.__actual_placement].x()
             )
             tooltip_pos.setY(
-                widget_pos.y() + self.__widget.height() + self.__offsets[self.__actual_placement].y()
+                widget_pos.y() + self.__widget.height()
             )
 
         elif self.__actual_placement == TooltipPlacement.LEFT:
             size.setWidth(body_size.width() + self.__triangle_widget.width() - border_width)
             tooltip_triangle_pos.setX(body_size.width() - border_width)
             tooltip_triangle_pos.setY(math.ceil(size.height() / 2 - self.__triangle_size))
-            tooltip_pos.setX(widget_pos.x() - size.width() + self.__offsets[self.__actual_placement].x())
+            tooltip_pos.setX(widget_pos.x() - size.width())
             tooltip_pos.setY(
                 int(widget_pos.y() + self.__widget.height() / 2 - size.height() / 2)
-                + self.__offsets[self.__actual_placement].y()
             )
 
         elif self.__actual_placement == TooltipPlacement.RIGHT:
@@ -948,11 +861,9 @@ class Tooltip(TooltipInterface):
             tooltip_body_pos.setX(self.__triangle_widget.width() - border_width)
             tooltip_pos.setX(
                 widget_pos.x() + self.__widget.width()
-                + self.__offsets[self.__actual_placement].x()
             )
             tooltip_pos.setY(
                 int(widget_pos.y() + self.__widget.height() / 2 - size.height() / 2)
-                + self.__offsets[self.__actual_placement].y()
             )
 
         # Move and resize widgets
