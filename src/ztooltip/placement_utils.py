@@ -22,7 +22,7 @@ class PlacementUtils:
         top_level_parent = Utils.get_top_level_parent(widget)
         top_level_parent_pos = top_level_parent.pos()
         top_level_parent_geometry = top_level_parent.geometry()
-        widget_pos = top_level_parent.mapToGlobal(widget.pos())
+        widget_pos = widget.mapToGlobal(QPoint(0, 0))
 
         # Calculate available space for placements
         left_space = widget_pos.x() - top_level_parent_pos.x()
@@ -112,8 +112,7 @@ class PlacementUtils:
         :return: rect of the tooltip
         """
 
-        top_level_parent = Utils.get_top_level_parent(widget)
-        widget_pos = top_level_parent.mapToGlobal(widget.pos())
+        widget_pos = widget.mapToGlobal(QPoint(0, 0))
         rect = QRect()
 
         # Calculate rect depending on placement

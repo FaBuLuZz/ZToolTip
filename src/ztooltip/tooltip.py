@@ -906,7 +906,7 @@ class Tooltip(TooltipInterface):
         tooltip_triangle_pos = QPoint(0, 0)
         tooltip_body_pos = QPoint(0, 0)
         tooltip_pos = QPoint(0, 0)
-        widget_pos = Utils.get_top_level_parent(self.__widget).mapToGlobal(self.__widget.pos())
+        widget_pos = self.__widget.mapToGlobal(QPoint(0, 0))
         border_width = 1 if self.__border_enabled else 0
         self.__triangle_widget.update()
 
