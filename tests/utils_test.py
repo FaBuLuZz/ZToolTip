@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import QMainWindow, QWidget, QPushButton
-from src.pyqttooltip.utils import Utils
+from src.ztooltip.utils import Utils
 
 
 def test_get_top_level_parent(qtbot):

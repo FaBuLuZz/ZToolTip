@@ -1,8 +1,8 @@
 from PyQt6.QtWidgets import QMainWindow, QPushButton
 from PyQt6.QtCore import QMargins, QPoint, QEasingCurve
 from PyQt6.QtGui import QColor, QFont
-from src.pyqttooltip import Tooltip, TooltipPlacement
-from src.pyqttooltip.constants import DROP_SHADOW_SIZE
+from src.ztooltip import Tooltip, TooltipPlacement
+from src.ztooltip.constants import DROP_SHADOW_SIZE
 
 
 def test_initial_values(qtbot):

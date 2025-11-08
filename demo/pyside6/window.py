@@ -4,7 +4,7 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import QPoint, Qt
 from PySide6.QtGui import QColor
-from pyqttooltip import Tooltip, TooltipPlacement
+from ztooltip import Tooltip, TooltipPlacement
 
 
 class Window(QMainWindow):

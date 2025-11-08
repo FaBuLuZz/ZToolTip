@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import QMainWindow, QPushButton
 from PyQt6.QtCore import QPoint, QSize
-from src.pyqttooltip import TooltipPlacement
-from src.pyqttooltip.placement_utils import PlacementUtils
+from src.ztooltip import TooltipPlacement
+from src.ztooltip.placement_utils import PlacementUtils
 
 
 def test_get_optimal_placement(qtbot):
