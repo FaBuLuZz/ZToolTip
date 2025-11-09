@@ -1,7 +1,7 @@
 import math
 from qtpy.QtWidgets import QWidget, QLabel, QGraphicsOpacityEffect
 from qtpy.QtCore import (
-    Qt, Signal, QMargins, QPoint, QSize, QTimer,
+    Qt, Signal, QMargins, QPoint, QSize, QTimer, QRect,
     QPropertyAnimation, QEasingCurve, QEvent, QObject
 )
 from qtpy.QtGui import QColor, QFont
@@ -811,9 +811,7 @@ class Tooltip(TooltipInterface):
 
         # Calculate actual tooltip placement
         if self.__placement == TooltipPlacement.AUTO:
-            self.__actual_placement = PlacementUtils.get_optimal_placement(
-                self.__widget, body_size, self.__triangle_size
-            )
+            self.__actual_placement = PlacementUtils.get_optimal_placement(self.__widget)
         else:
             self.__actual_placement = self.__placement
 
@@ -865,6 +863,28 @@ class Tooltip(TooltipInterface):
             tooltip_pos.setY(
                 int(widget_pos.y() + self.__widget.height() / 2 - size.height() / 2)
             )
+
+        # Constrain tooltip within window bounds
+        window = self.__widget.window()
+        original_tooltip_pos = QPoint(tooltip_pos)
+
+        global_rect = window.geometry()
+        tooltip_rect = QRect(tooltip_pos, size)
+
+        # Calculate overflow and adjust position
+        if tooltip_rect.right() > global_rect.right():
+            tooltip_pos.setX(global_rect.right() - size.width() - self.__triangle_size)
+        if tooltip_rect.left() < global_rect.left():
+            tooltip_pos.setX(global_rect.left() + self.__triangle_size)
+        if tooltip_rect.bottom() > global_rect.bottom():
+            tooltip_pos.setY(global_rect.bottom() - size.height() - self.__triangle_size)
+        if tooltip_rect.top() < global_rect.top():
+            tooltip_pos.setY(global_rect.top() + self.__triangle_size)
+
+        # Adjust triangle position to compensate for tooltip translation
+        translation_offset = QPoint(tooltip_pos.x() - original_tooltip_pos.x(), tooltip_pos.y() - original_tooltip_pos.y())
+        tooltip_triangle_pos.setX(tooltip_triangle_pos.x() - translation_offset.x())
+        tooltip_triangle_pos.setY(tooltip_triangle_pos.y() - translation_offset.y())
 
         # Move and resize widgets
         self.__text_widget.resize(text_size)

@@ -15,20 +15,20 @@ def test_get_optimal_placement(qtbot):
     # Left placement
     window.setFixedSize(500, 250)
     button.move(400, 100)
-    placement = PlacementUtils.get_optimal_placement(button, QSize(100, 30), 5)
+    placement = PlacementUtils.get_optimal_placement(button)
     assert placement == TooltipPlacement.LEFT
 
     # Right placement
     button.move(0, 100)
-    placement = PlacementUtils.get_optimal_placement(button, QSize(100, 30), 5)
+    placement = PlacementUtils.get_optimal_placement(button)
     assert placement == TooltipPlacement.RIGHT
 
     # Top placement
     button.move(250, 250)
-    placement = PlacementUtils.get_optimal_placement(button, QSize(100, 30), 5)
+    placement = PlacementUtils.get_optimal_placement(button)
     assert placement == TooltipPlacement.TOP
 
     # Bottom placement
     button.move(250, 0)
-    placement = PlacementUtils.get_optimal_placement(button, QSize(100, 30), 5)
+    placement = PlacementUtils.get_optimal_placement(button)
     assert placement == TooltipPlacement.BOTTOM
