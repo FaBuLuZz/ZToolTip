@@ -99,6 +99,12 @@ class Tooltip(TooltipInterface):
         self.__duration_timer.setSingleShot(True)
         self.__duration_timer.timeout.connect(self.__start_fade_out)
 
+        # Init update debounce timer
+        self.__update_debounce_timer = QTimer(self)
+        self.__update_debounce_timer.setInterval(16)  # ~60fps
+        self.__update_debounce_timer.setSingleShot(True)
+        self.__update_debounce_timer.timeout.connect(self.__do_update_ui)
+
         # Init fade animations
         self.__fade_in_animation = QPropertyAnimation(self.__opacity_effect, b'opacity')
         self.__fade_in_animation.setDuration(self.__fade_in_duration)
@@ -774,7 +780,14 @@ class Tooltip(TooltipInterface):
         )
 
     def __update_ui(self):
-        """Update the UI of the tooltip"""
+        """Update the UI of the tooltip with debouncing
+        to prevent excessive recalculations"""
+
+        if not self.__update_debounce_timer.isActive():
+            self.__update_debounce_timer.start()
+
+    def __do_update_ui(self):
+        """Actually update the UI of the tooltip"""
 
         if not self.__widget:
             return
