@@ -38,6 +38,7 @@ class Tooltip(TooltipInterface):
         self.__triangle_size = 5
         self.__show_delay = 50
         self.__hide_delay = 50
+        self.__refresh_rate = 60
         self.__fade_in_duration = 150
         self.__fade_out_duration = 150
         self.__fade_in_easing_curve = QEasingCurve.Type.Linear
@@ -101,7 +102,7 @@ class Tooltip(TooltipInterface):
 
         # Init update debounce timer
         self.__update_debounce_timer = QTimer(self)
-        self.__update_debounce_timer.setInterval(16)  # ~60fps
+        self.__update_debounce_timer.setInterval(0 if self.__refresh_rate == 0 else int(1000 / self.__refresh_rate))
         self.__update_debounce_timer.setSingleShot(True)
         self.__update_debounce_timer.timeout.connect(self.__do_update_ui)
 
@@ -307,6 +308,23 @@ class Tooltip(TooltipInterface):
 
         self.__hide_delay = delay
         self.__hide_delay_timer.setInterval(delay)
+
+    def getRefreshRate(self) -> int:
+        """Get the refresh rate for UI updates
+
+        :return: refresh rate in Hz
+        """
+
+        return self.__refresh_rate
+
+    def setRefreshRate(self, refresh_rate: int):
+        """Set the refresh rate for UI updates
+
+        :param refresh_rate: new refresh rate in Hz (0 for no limit)
+        """
+
+        self.__refresh_rate = refresh_rate
+        self.__update_debounce_timer.setInterval(0 if refresh_rate == 0 else int(1000 / refresh_rate))
 
     def getFadeInDuration(self) -> int:
         """Get the duration of the fade in animation
@@ -782,6 +800,10 @@ class Tooltip(TooltipInterface):
     def __update_ui(self):
         """Update the UI of the tooltip with debouncing
         to prevent excessive recalculations"""
+
+        if self.__refresh_rate == 0:
+            self.__do_update_ui()
+            return
 
         if not self.__update_debounce_timer.isActive():
             self.__update_debounce_timer.start()
