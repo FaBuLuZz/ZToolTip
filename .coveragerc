@@ -1,4 +1,4 @@
 [run]
 omit =
     tests/*
-    src/pyqttooltip/tooltip_interface.py
+    src/ztooltip/tooltip_interface.py

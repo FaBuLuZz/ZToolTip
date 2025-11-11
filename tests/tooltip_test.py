@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import QMainWindow, QPushButton
-from PyQt6.QtCore import QMargins, QPoint, QEasingCurve
+from PyQt6.QtCore import QMargins, QEasingCurve
 from PyQt6.QtGui import QColor, QFont
 from src.ztooltip import Tooltip, TooltipPlacement
 from src.ztooltip.constants import DROP_SHADOW_SIZE
@@ -9,7 +9,6 @@ def test_initial_values(qtbot):
     """Test initial values after instantiating"""
 
     tooltip = Tooltip()
-    qtbot.addWidget(tooltip)
 
     assert tooltip.getWidget() is None
     assert tooltip.getText() == ''
@@ -19,6 +18,7 @@ def test_initial_values(qtbot):
     assert tooltip.getTriangleSize() == 5
     assert tooltip.getShowDelay() == 50
     assert tooltip.getHideDelay() == 50
+    assert tooltip.getRefreshRate() == 60
     assert tooltip.getFadeInDuration() == 150
     assert tooltip.getFadeOutDuration() == 150
     assert tooltip.getFadeInEasingCurve() == QEasingCurve.Type.Linear
@@ -43,12 +43,12 @@ def test_show_hide(qtbot):
     window = QMainWindow()
     button = QPushButton(window)
     tooltip = Tooltip(button, 'Tooltip')
+    tooltip.setRefreshRate(0)
     tooltip.setOpacity(0)
     tooltip.setFadeInDuration(0)
     tooltip.setShowDelay(0)
     qtbot.addWidget(window)
     qtbot.addWidget(button)
-    qtbot.addWidget(tooltip)
 
     # Show
     tooltip.show()
@@ -69,7 +69,6 @@ def test_set_widget(qtbot):
     tooltip = Tooltip(button1, 'Tooltip')
     qtbot.addWidget(button1)
     qtbot.addWidget(button2)
-    qtbot.addWidget(tooltip)
 
     tooltip.setWidget(button2)
     assert tooltip.getWidget() == button2
@@ -79,7 +78,6 @@ def test_set_text(qtbot):
     """Test setting the text of the tooltip"""
 
     tooltip = Tooltip(text='Tooltip')
-    qtbot.addWidget(tooltip)
 
     tooltip.setText('New tooltip text')
     assert tooltip.getText() == 'New tooltip text'
@@ -92,7 +90,6 @@ def test_set_duration(qtbot):
     tooltip.setOpacity(0)
     tooltip.setFadeInDuration(0)
     tooltip.setShowDelay(0)
-    qtbot.addWidget(tooltip)
 
     tooltip.setDuration(50)
     assert tooltip.getDuration() == 50
@@ -109,31 +106,33 @@ def test_set_placement(qtbot):
     window = QMainWindow()
     button = QPushButton(window)
     tooltip = Tooltip(button, 'Tooltip')
+    tooltip.setRefreshRate(0)
     tooltip.setOpacity(0)
     tooltip.setFadeInDuration(0)
     tooltip.setShowDelay(0)
     tooltip.setDropShadowEnabled(False)
     qtbot.addWidget(window)
     qtbot.addWidget(button)
-    qtbot.addWidget(tooltip)
-    tooltip.show()
-    qtbot.wait(250)
+
+    window.setFixedSize(200, 200)
+    button.setFixedSize(0, 0)
+    button.move(100, 100)
 
     # Left
     tooltip.setPlacement(TooltipPlacement.LEFT)
-    assert tooltip.x() == -tooltip.width()
+    assert tooltip.x() == button.x() - tooltip.width()
 
     # Right
     tooltip.setPlacement(TooltipPlacement.RIGHT)
-    assert tooltip.x() == button.width()
+    assert tooltip.x() == button.x() + button.width()
 
     # Top
     tooltip.setPlacement(TooltipPlacement.TOP)
-    assert tooltip.y() == -tooltip.height()
+    assert tooltip.y() == button.y() - tooltip.height()
 
     # Bottom
     tooltip.setPlacement(TooltipPlacement.BOTTOM)
-    assert tooltip.y() == button.height()
+    assert tooltip.y() == button.y() + button.height()
 
 
 def test_set_triangle(qtbot):
@@ -143,12 +142,18 @@ def test_set_triangle(qtbot):
     button = QPushButton(window)
     tooltip = Tooltip(button, 'Tooltip')
     tooltip.setPlacement(TooltipPlacement.RIGHT)
+    tooltip.setRefreshRate(0)
     tooltip.setOpacity(0)
     tooltip.setFadeInDuration(0)
     tooltip.setShowDelay(0)
     qtbot.addWidget(window)
     qtbot.addWidget(button)
-    qtbot.addWidget(tooltip)
+    tooltip.show()
+
+    window.setFixedSize(200, 200)
+    button.setFixedSize(0, 0)
+    button.move(100, 100)
+
     width = tooltip.width()
 
     # Bigger triangle
@@ -164,7 +169,6 @@ def test_set_delays(qtbot):
     """Test setting the delays"""
 
     tooltip = Tooltip(text='Tooltip')
-    qtbot.addWidget(tooltip)
 
     tooltip.setShowDelay(100)
     tooltip.setHideDelay(80)
@@ -176,7 +180,6 @@ def test_set_fade_durations(qtbot):
     """Test setting the fade in / out animation durations"""
 
     tooltip = Tooltip(text='Tooltip')
-    qtbot.addWidget(tooltip)
 
     tooltip.setFadeInDuration(250)
     tooltip.setFadeOutDuration(220)
@@ -188,7 +191,6 @@ def test_set_easing_curves(qtbot):
     """Test setting the easing curves for the fade animations"""
 
     tooltip = Tooltip(text='Tooltip')
-    qtbot.addWidget(tooltip)
 
     tooltip.setFadeInEasingCurve(QEasingCurve.Type.OutCurve)
     tooltip.setFadeOutEasingCurve(QEasingCurve.Type.InCubic)
@@ -205,7 +207,6 @@ def test_set_text_centering_enabled(qtbot):
     """Test disabling text centering for wrapped text"""
 
     tooltip = Tooltip(text='Tooltip')
-    qtbot.addWidget(tooltip)
 
     tooltip.setTextCenteringEnabled(False)
     assert tooltip.isTextCenteringEnabled() == False
@@ -215,7 +216,6 @@ def test_set_border_radius(qtbot):
     """Test setting the border radius"""
 
     tooltip = Tooltip(text='Tooltip')
-    qtbot.addWidget(tooltip)
 
     tooltip.setBorderRadius(4)
     assert tooltip.getBorderRadius() == 4
@@ -225,7 +225,6 @@ def test_set_border_enabled(qtbot):
     """Test enabling the border"""
 
     tooltip = Tooltip(text='Tooltip')
-    qtbot.addWidget(tooltip)
 
     tooltip.setBorderEnabled(True)
     assert tooltip.isBorderEnabled() == True
@@ -235,7 +234,6 @@ def test_set_colors(qtbot):
     """Test setting the colors of the tooltip"""
 
     tooltip = Tooltip(text='Tooltip')
-    qtbot.addWidget(tooltip)
 
     tooltip.setBackgroundColor(QColor('#FFFFFF'))
     tooltip.setTextColor(QColor('#000000'))
@@ -249,7 +247,6 @@ def test_set_font(qtbot):
     """Test setting the font of the tooltip"""
 
     tooltip = Tooltip(text='Tooltip')
-    qtbot.addWidget(tooltip)
 
     font = QFont('Arial', 9, QFont.Weight.Medium)
     tooltip.setFont(font)
@@ -264,12 +261,14 @@ def test_set_margins(qtbot):
     button = QPushButton(window)
     tooltip = Tooltip(button, 'Tooltip')
     tooltip.setMargins(QMargins(0, 0, 0, 0))
+    tooltip.setRefreshRate(0)
     tooltip.setOpacity(0)
     tooltip.setFadeInDuration(0)
     tooltip.setShowDelay(0)
     qtbot.addWidget(window)
     qtbot.addWidget(button)
-    qtbot.addWidget(tooltip)
+    tooltip.show()
+
     size = tooltip.size()
 
     tooltip.setMargins(QMargins(10, 5, 10, 5))
@@ -284,12 +283,12 @@ def test_set_drop_shadow_enabled(qtbot):
     button = QPushButton(window)
     tooltip = Tooltip(button, 'Tooltip')
     tooltip.setPlacement(TooltipPlacement.TOP)
+    tooltip.setRefreshRate(0)
     tooltip.setOpacity(0)
     tooltip.setFadeInDuration(0)
     tooltip.setShowDelay(0)
     qtbot.addWidget(window)
     qtbot.addWidget(button)
-    qtbot.addWidget(tooltip)
     tooltip.show()
     qtbot.wait(250)
     size = tooltip.size()
@@ -303,7 +302,6 @@ def test_set_drop_shadow_strength(qtbot):
     """Test setting the strength of the drop shadow"""
 
     tooltip = Tooltip(text='Tooltip')
-    qtbot.addWidget(tooltip)
 
     tooltip.setDropShadowStrength(3.5)
     assert tooltip.getDropShadowStrength() == 3.5
@@ -314,15 +312,15 @@ def test_set_maximum_width(qtbot):
 
     window = QMainWindow()
     button = QPushButton(window)
-    tooltip = Tooltip(button, 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr')
+    tooltip = Tooltip(button, 'Lorem ipsum dolor sit amet, consectetur adipiscing elit')
     tooltip.setMaximumWidth(150)
+    tooltip.setRefreshRate(0)
     tooltip.setOpacity(0)
     tooltip.setFadeInDuration(0)
     tooltip.setShowDelay(0)
     tooltip.setDropShadowEnabled(False)
     qtbot.addWidget(window)
     qtbot.addWidget(button)
-    qtbot.addWidget(tooltip)
 
     assert tooltip.maximumWidth() == 150
     assert tooltip.width() <= 150
@@ -337,6 +335,7 @@ def test_change_top_level_parent(qtbot):
     button = QPushButton(window1)
     tooltip = Tooltip(button, 'Tooltip')
     tooltip.setPlacement(TooltipPlacement.TOP)
+    tooltip.setRefreshRate(0)
     tooltip.setOpacity(0)
     tooltip.setFadeInDuration(0)
     tooltip.setShowDelay(0)
@@ -344,7 +343,6 @@ def test_change_top_level_parent(qtbot):
     qtbot.addWidget(window1)
     qtbot.addWidget(window2)
     qtbot.addWidget(button)
-    qtbot.addWidget(tooltip)
     x = tooltip.x()
     y = tooltip.y()
 
@@ -366,7 +364,6 @@ def test_delete_parent(qtbot):
     tooltip.setFadeInDuration(0)
     tooltip.setShowDelay(0)
     tooltip.setDropShadowEnabled(False)
-    qtbot.addWidget(tooltip)
     tooltip.show()
     qtbot.wait(250)
 
@@ -384,13 +381,13 @@ def test_move_top_level_parent(qtbot):
     button = QPushButton(window)
     tooltip = Tooltip(button, 'Tooltip')
     tooltip.setPlacement(TooltipPlacement.TOP)
+    tooltip.setRefreshRate(0)
     tooltip.setOpacity(0)
     tooltip.setFadeInDuration(0)
     tooltip.setShowDelay(0)
     tooltip.setDropShadowEnabled(False)
     qtbot.addWidget(window)
     qtbot.addWidget(button)
-    qtbot.addWidget(tooltip)
     x = tooltip.x()
     y = tooltip.y()
 
@@ -409,13 +406,13 @@ def test_resize_widget(qtbot):
     button.resize(100, 25)
     tooltip = Tooltip(button, 'Tooltip')
     tooltip.setPlacement(TooltipPlacement.BOTTOM)
+    tooltip.setRefreshRate(0)
     tooltip.setOpacity(0)
     tooltip.setFadeInDuration(0)
     tooltip.setShowDelay(0)
     tooltip.setDropShadowEnabled(False)
     qtbot.addWidget(window)
     qtbot.addWidget(button)
-    qtbot.addWidget(tooltip)
     y = tooltip.y()
 
     # Change button height by 25px and check if y position changed by 25px
@@ -431,13 +428,13 @@ def test_move_widget(qtbot):
     button = QPushButton(window)
     tooltip = Tooltip(button, 'Tooltip')
     tooltip.setPlacement(TooltipPlacement.BOTTOM)
+    tooltip.setRefreshRate(0)
     tooltip.setOpacity(0)
     tooltip.setFadeInDuration(0)
     tooltip.setShowDelay(0)
     tooltip.setDropShadowEnabled(False)
     qtbot.addWidget(window)
     qtbot.addWidget(button)
-    qtbot.addWidget(tooltip)
     x = tooltip.x()
     y = tooltip.y()
 
