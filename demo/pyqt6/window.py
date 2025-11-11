@@ -2,8 +2,8 @@ from PyQt6.QtWidgets import (
     QMainWindow, QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QFormLayout,
     QComboBox, QLineEdit, QSpinBox, QDoubleSpinBox, QCheckBox
 )
-from PyQt6.QtCore import QPoint, Qt
-from PyQt6.QtGui import QColor
+from PyQt6.QtCore import QPoint, Qt, QMimeData
+from PyQt6.QtGui import QColor, QDrag
 from ztooltip import Tooltip, TooltipPlacement
 
 
@@ -13,12 +13,17 @@ class Window(QMainWindow):
         super().__init__(parent=None)
 
         # Window settings
-        self.setWindowTitle('PyQt Tooltip Demo')
+        self.setWindowTitle('ZTooltip Demo')
         self.setFixedSize(600, 330)
 
         # Create tooltip widget and tooltip
         self.tooltip_widget = QPushButton('Show tooltip', self)
         self.tooltip_widget.setFixedSize(110, 30)
+
+        # Enable drag and drop
+        self.tooltip_widget.setAcceptDrops(True)
+        self.setAcceptDrops(True)
+        self.drag_start_position = QPoint()
 
         self.tooltip = Tooltip(self.tooltip_widget, 'This is a tooltip')
 
@@ -107,6 +112,7 @@ class Window(QMainWindow):
         self.border_color_input.textChanged.connect(self.border_color_input_changed)
 
         self.border_enabled_input = QCheckBox('Border enabled')
+        self.border_enabled_input.setChecked(self.tooltip.isBorderEnabled())
         self.border_enabled_input.stateChanged.connect(self.border_enabled_input_changed)
 
         # Add widgets to layout
@@ -166,3 +172,32 @@ class Window(QMainWindow):
 
     def border_enabled_input_changed(self, state):
         self.tooltip.setBorderEnabled(state)
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.drag_start_position = event.pos()
+
+    def mouseMoveEvent(self, event):
+        if not (event.buttons() & Qt.MouseButton.LeftButton):
+            return
+        if ((event.pos() - self.drag_start_position).manhattanLength() < 3):
+            return
+        
+        drag = QDrag(self)
+        mimeData = QMimeData()
+        mimeData.setText("tooltip_button")
+        drag.setMimeData(mimeData)
+        drag.exec(Qt.DropAction.MoveAction)
+
+    def dragEnterEvent(self, event):
+        if event.mimeData().hasText():
+            event.accept()
+        else:
+            event.ignore()
+
+    def dropEvent(self, event):
+        position = event.pos()
+        center_x = position.x() - self.tooltip_widget.width() // 2
+        center_y = position.y() - self.tooltip_widget.height() // 2
+        self.tooltip_widget.move(center_x, center_y)
+        event.accept()

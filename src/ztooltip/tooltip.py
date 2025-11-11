@@ -46,11 +46,11 @@ class Tooltip(TooltipInterface):
         self.__fade_in_easing_curve = QEasingCurve.Type.Linear
         self.__fade_out_easing_curve = QEasingCurve.Type.Linear
         self.__text_centering_enabled = True
-        self.__border_radius = 2
-        self.__border_enabled = False
-        self.__background_color = QColor('#111214')
-        self.__text_color = QColor('#CFD2D5')
-        self.__border_color = QColor('#403E41')
+        self.__border_radius = 8
+        self.__border_enabled = True
+        self.__background_color = QColor('#FFFFFF')
+        self.__text_color = QColor('#373737')
+        self.__border_color = QColor('#CDCFD6')
         self.__font = QFont('Arial', 9, QFont.Weight.Bold)
         self.__margins = QMargins(12, 8, 12, 7)
         self.__drop_shadow_enabled = True
