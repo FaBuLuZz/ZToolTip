@@ -1,4 +1,6 @@
 import math
+import win32con
+import win32gui
 from qtpy.QtWidgets import QWidget, QLabel, QGraphicsOpacityEffect
 from qtpy.QtCore import (
     Qt, Signal, QMargins, QPoint, QSize, QTimer, QRect,
@@ -707,6 +709,10 @@ class Tooltip(TooltipInterface):
         else:
             self.__start_fade_in()
 
+    def showEvent(self, event):
+        super().showEvent(event)
+        self.__adjust_z_order()
+
     def hide(self, delay: bool = False):
         """Start the process of hiding the tooltip
 
@@ -796,6 +802,18 @@ class Tooltip(TooltipInterface):
             'border: none;'
             'color: {}'.format(self.__text_color.name())
         )
+
+    def __adjust_z_order(self):
+        """Adjust the z-order of the tooltip to be on top of the widget"""
+
+        if not self.__widget:
+            return
+
+        tooltip_hwnd = self.winId()
+        window_hwnd = self.__widget.window().winId()
+        flags = win32con.SWP_NOMOVE | win32con.SWP_NOSIZE | win32con.SWP_NOACTIVATE
+        win32gui.SetWindowPos(tooltip_hwnd, window_hwnd, 0, 0, 0, 0, flags)
+        win32gui.SetWindowPos(window_hwnd, tooltip_hwnd, 0, 0, 0, 0, flags)
 
     def __update_ui(self):
         """Update the UI of the tooltip with debouncing
