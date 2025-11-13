@@ -149,6 +149,10 @@ class Tooltip(TooltipInterface):
                 or event.type() == event.Type.Show or event.type() == event.Type.Hide):
             self.__update_ui()
 
+        # Window closed or hidden
+        if event.type() == event.Type.Close or event.type() == event.Type.Hide:
+            self.hide()
+
         # One of the parents changed
         if event.type() == event.Type.ParentChange:
             self.__install_event_filters()
