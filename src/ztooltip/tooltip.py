@@ -159,10 +159,11 @@ class Tooltip(TooltipInterface):
 
         # Parent or widget deleted
         if event.type() == event.Type.DeferredDelete:
-            self.__install_event_filters()
-            self.hide()
             if watched == self.__widget:
                 self.__widget = None
+            self.__update_debounce_timer.stop()
+            self.__install_event_filters()
+            self.hide()
         return False
 
     def getWidget(self) -> QWidget:
@@ -834,6 +835,13 @@ class Tooltip(TooltipInterface):
         """Actually update the UI of the tooltip"""
 
         if not self.__widget:
+            return
+
+        try:
+            self.__widget.isVisible()
+        except RuntimeError:
+            self.__widget = None
+            self.hide()
             return
 
         # Calculate text width and height
